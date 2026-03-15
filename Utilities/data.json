@@ -1,0 +1,34 @@
+{
+  "add_employee": {
+    "select_role": "Admin",
+    "employee_name": "manda akhil user",
+    "select_status": "Enable",
+    "username": "Ravi@123",
+    "password": "Ravi@123",
+    "confirm_password": "Ravi@123"
+  },
+
+  "employees_to_verify": [
+    {
+      "user_role": "ESS",
+      "employee_name": "Jobin Mathew Sam",
+      "status": "Enable",
+      "username": "Jobinsam@6742"
+
+    },
+
+    {
+      "username": "ESSUser",
+      "user_role": "ESS",
+      "employee_name": "Linda Anderson",
+      "status": "Enabled"
+    }
+  ]
+  ,
+  "create_new_employee": {
+    "first_name": "Kavita",
+    "middle_name": "",
+    "last_name": "A",
+    "employee_id": ""
+  }
+}
