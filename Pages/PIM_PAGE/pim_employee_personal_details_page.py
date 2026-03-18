@@ -2,12 +2,18 @@ import logging
 
 from selenium.webdriver.common.by import By
 
+from Pages.PIM_PAGE.PIM_BASE_PAGE import PIMBasePage
 from Pages.base_page import BasePage
+from Pages.components.calendar_helper import CalendarHelper
 
 
-class EmployeePersonalDetailsPage(BasePage):
+class EmployeePersonalDetailsPage(PIMBasePage):
+
     logger = logging.getLogger(__name__)
 
+    # select license expirey date
+    click_License_expiry_date = (By.XPATH, "(//i[contains(@class,'bi-calendar')])[1]")
+    click_Date_of_birth = (By.XPATH, "(//i[contains(@class,'bi-calendar')])[2]")
     # Input fields
     license_exp_date = (By.NAME, "licenseExpiryDate")
     dob = (By.NAME, "dateOfBirth")
@@ -37,58 +43,21 @@ class EmployeePersonalDetailsPage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
         self.driver = driver
-
-    def month_option(self, month):
-        return(
-            By.XPATH,
-            f"//div[contains(@class,'oxd-calendar-calendar-month')]//li[normalize-space()='{month}']"
-        )
-
-    def year_option(self, year):
-        return(
-            By.XPATH,
-            f"//div[contains(@class,'oxd-calendar-selector-year')]//li[normalize-space()='{year}']"
-        )
-
-    def day_option(self, day):
-        return(
-            By.XPATH,
-            f"//div[contains(@class,'oxd-calendar-dates-grid')]//div[contains(@class,'oxd-calendar-date') and normalize-space()='{int(day)}']"
-        )
-
-    def open_calendar(self, field_locator):
-        self.logger.info("Open calendar for %s", field_locator)
-        self.click(field_locator)
-        assert self.is_visible(self.calendar), "Calendar did not open"
-        return self
-
-    def select_calendar_date(self, field_locator, year, month, day):
-            self.logger.info("Select date %s-%s-%s", year, month, day)
-            self.open_calendar(field_locator)
-            try:
-                self.click(self.month_open)
-            except Exception:
-                self.open_calendar(field_locator)
-                self.click(self.month_open)
-            self.click(self.month_option(month))
-            try:
-                self.click(self.year_open)
-            except Exception:
-                self.open_calendar(field_locator)
-                self.click(self.year_open)
-            self.click(self.year_option(str(year)))
-            try:
-                self.click(self.day_option(day))
-            except Exception:
-                self.open_calendar(field_locator)
-                self.click(self.day_option(day))
-            return self
+        self.calendar = CalendarHelper(driver)
 
     def set_license_expiry_date(self, year, month, day):
-        return self.select_calendar_date(self.license_exp_date, year, month, day)
+        self.logger.info("Updated the license expiry date of employee")
+        self.is_loaded(self.license_exp_date, timeout=15)
+        self.click(self.click_License_expiry_date)
+        self.calendar.select_date_month_year(year, month, day)
+        return self
 
-    def set_date_of_birth(self, year, month, day):
-        return self.select_calendar_date(self.dob, year, month, day)
+    def set_date_of_birth(self, birth_year, birth_month, birth_day):
+        self.logger.info("update the date of birth of employee")
+        self.is_loaded(self.dob, timeout=10)
+        self.click(self.click_Date_of_birth)
+        self.calendar.select_date_month_year(birth_year, birth_month, birth_day)
+        return self
 
     def select_nationality(self, nationality):
         self.logger.info("Select nationality: %s", nationality)
@@ -97,6 +66,7 @@ class EmployeePersonalDetailsPage(BasePage):
 
     def select_marital_status(self, marital_status):
         self.logger.info("Select marital status: %s", marital_status)
+        self.select_dropdown(self.marital_status_dd, marital_status)
         return self
 
     def select_gender(self, gender):
@@ -132,6 +102,15 @@ class EmployeePersonalDetailsPage(BasePage):
         return self
 
 
+    def added_additional_details(self, day, month, year, nationality,marital_status,
+                                 birth_year, birth_month, birth_day,gender ):
+        self.set_license_expiry_date(year, month, day)
+        self.select_nationality(nationality)
+        self.select_marital_status(marital_status)
+        self.set_date_of_birth(birth_year, birth_month, birth_day)
+        self.select_gender(gender)
+        self.click(self.save_btn)
+        return self
 
 
 

@@ -29,6 +29,18 @@
     "first_name": "Kavita",
     "middle_name": "",
     "last_name": "A",
-    "employee_id": ""
+    "employee_id": "",
+    "day":"5",
+    "month":"June",
+     "year":"2028",
+    "nationality":"India",
+    "marital_status":"Married",
+    "birth_year":"1993",
+    "birth_month":"March",
+    "birth_day":"5",
+    "gender":"female"
+
+
+
   }
 }

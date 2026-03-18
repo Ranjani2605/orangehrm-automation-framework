@@ -4,6 +4,7 @@ import os
 import allure
 import pytest
 
+from Pages.PIM_PAGE.pim_create_new_employee_page import PIMCreateNewEmployeeAdd
 from Pages.left_sidebar_page import LeftSidebarPage
 from Utilities.auth import login
 
@@ -24,16 +25,26 @@ def test_add_employee(driver):
     emp_data = data["create_new_employee"]
 
     left_sidebar = LeftSidebarPage(driver)
-    pim_page = left_sidebar.navigate_to_pim()
+    left_sidebar.navigate_to_pim()
+    new_employee = PIMCreateNewEmployeeAdd(driver)
 
-    first_name = emp_data["first_name"]
-    middle_name = emp_data.get("middle_name", "")
-    last_name = emp_data["last_name"]
-    employee_id = emp_data.get("employee_id", "")
 
-    pim_page.add_employee(
-        first_name=first_name,
-        middle_name=middle_name,
-        last_name=last_name,
-        employee_id=employee_id
+    created_employee = new_employee.add_employee(
+        first_name=emp_data["first_name"],
+        middle_name=emp_data.get("middle_name", ""),
+        last_name=emp_data["last_name"],
+        employee_id=emp_data.get("employee_id", "")
     )
+
+    created_employee.added_additional_details(
+        day=emp_data["day"], month=emp_data["month"], year=emp_data["year"],
+        nationality=emp_data["nationality"], marital_status=emp_data["marital_status"],
+        birth_year=emp_data["birth_year"], birth_month=emp_data["birth_month"], birth_day=emp_data["birth_day"],
+        gender=emp_data["gender"]
+
+    )
+
+
+
+
+

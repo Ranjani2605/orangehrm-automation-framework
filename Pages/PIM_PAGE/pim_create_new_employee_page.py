@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 
 
 
-from Pages.PIM_PAGE.PIM_BASE_PAGE import PIMBasePage
 from Pages.PIM_PAGE.pim_employee_personal_details_page import EmployeePersonalDetailsPage
 
 from Pages.components.breadcrumb_helper import *
