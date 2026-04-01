@@ -42,6 +42,7 @@ def test_add_employee(driver):
         birth_year=emp_data["birth_year"], birth_month=emp_data["birth_month"], birth_day=emp_data["birth_day"],
         gender=emp_data["gender"]
 
+
     )
 
 

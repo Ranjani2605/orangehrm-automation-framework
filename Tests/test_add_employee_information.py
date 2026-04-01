@@ -4,7 +4,7 @@ import os
 import allure
 import pytest
 
-from Pages.PIM_PAGE.pim_create_new_employee_page import EmployeeAdd
+from Pages.PIM_PAGE.pim_create_new_employee_page import PIMCreateNewEmployeeAdd
 from Pages.system_users_page import SystemUsersPage
 from Utilities.auth import login
 
@@ -26,7 +26,7 @@ def test_add_employee(driver):
     emp_data = data["add_employee"]
 
 
-    employee_add = EmployeeAdd(driver)
+    employee_add = PIMCreateNewEmployeeAdd(driver)
     employee_add.add_new_employee(select_role=emp_data['select_role'],
                                   employee_name=emp_data['employee_name'],
                                   select_status=emp_data['select_status'],

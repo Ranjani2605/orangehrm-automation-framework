@@ -26,19 +26,19 @@
   ]
   ,
   "create_new_employee": {
-    "first_name": "Kavita",
+    "first_name": "Lalitha",
     "middle_name": "",
-    "last_name": "A",
+    "last_name": "Ana",
     "employee_id": "",
+    "year":"2026",
     "day":"5",
     "month":"June",
-     "year":"2028",
-    "nationality":"India",
+    "nationality":"Indian",
     "marital_status":"Married",
     "birth_year":"1993",
     "birth_month":"March",
     "birth_day":"5",
-    "gender":"female"
+    "gender":"Female"
 
 
 

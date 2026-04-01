@@ -66,6 +66,13 @@ class BasePage:
         except TimeoutException:
             raise Exception(f"Element not loaded")
 
+    def select_oxd_dropdown(self, label_text, option_text, timeout=None):
+        wait_time = timeout if timeout is not None else self.default_timeout
+        dropdown = (By.XPATH, f"//label[normalize-space()='{label_text}']/following::div[contains(@class,'oxd-select-text')][1]")
+        option = (By.XPATH, f"//div[@role='listbox']//span[normalize-space()='{option_text}']")
+        WebDriverWait(self.driver, wait_time).until(EC.element_to_be_clickable(dropdown)).click()
+        WebDriverWait(self.driver, wait_time).until(EC.element_to_be_clickable(option)).click()
+
     def is_visible(self, locator, timeout=10):
         try:
             self.wait.until(EC.visibility_of_element_located(locator))
@@ -81,6 +88,11 @@ class BasePage:
     def find_all_elements(self, locator):
         self.wait.until(EC.visibility_of_all_elements_located(locator))
 
+    def find_all(self, locator):
+        self.wait.until(EC.presence_of_all_elements_located(locator))
+
+    def find_element(self, locator):
+        self.wait.until(EC.presence_of_element_located(locator))
 
     def get_element(self, dropdown_locator, timeout=15):
         wait_time = timeout if timeout is not None else self.default_timeout
@@ -92,13 +104,16 @@ class BasePage:
         element = WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(locator))
         element.send_keys(Keys.ENTER)
 
-    def find_all(self, locator):
-        self.wait.until(EC.presence_of_all_elements_located(locator))
 
     def verify_page_title(self, expected_title):
         actual_title = self.driver.title
         assert actual_title == expected_title, f"Expected '{expected_title}', but got '{actual_title}'"
         return True
+
+    def wait_for_invisibility(self, locator, timeout=15):
+        wait_time = timeout if timeout is not None else self.default_timeout
+        WebDriverWait(self.driver, wait_time).until(EC.invisibility_of_element_located(locator))
+
 
 
 
