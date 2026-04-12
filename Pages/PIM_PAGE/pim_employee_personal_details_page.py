@@ -6,11 +6,12 @@ from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 
 from Pages.PIM_PAGE.PIM_BASE_PAGE import PIMBasePage
+from Pages.PIM_PAGE.pim_employee_list import PIMEmployeeList
 from Pages.base_page import BasePage
 from Pages.components.calendar_helper import CalendarHelper
 
 
-class EmployeePersonalDetailsPage(PIMBasePage, BasePage):
+class EmployeePersonalDetailsPage(PIMBasePage):
 
     logger = logging.getLogger(__name__)
 
@@ -53,10 +54,12 @@ class EmployeePersonalDetailsPage(PIMBasePage, BasePage):
     # Success employee created
     successfully_saved = (By.XPATH, "//div[contains(@class,'oxd-toast-content') and .//p[normalize-space()='Successfully Saved']]")
 
-    def __init__(self, driver):
+    def __init__(self, driver, created_employee_id=None):
         super().__init__(driver)
         self.driver = driver
         self.calendar_helper = CalendarHelper(driver)
+        self.employee_id = created_employee_id
+        self.created_employee_id = created_employee_id
 
     def set_license_expiry_date(self, year, month, day):
         self.logger.info("Updated the license expiry date of employee")
@@ -151,7 +154,7 @@ class EmployeePersonalDetailsPage(PIMBasePage, BasePage):
         self.set_date_of_birth(birth_year, birth_month, birth_day)
         self.select_gender(gender)
         self.click(self.save_btn)
-        return self
+        return PIMEmployeeList(self.driver, created_employee_id=self.employee_id)
 
 
     def successfully_added_employee(self, success):

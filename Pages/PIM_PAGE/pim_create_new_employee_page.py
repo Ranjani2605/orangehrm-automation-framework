@@ -1,6 +1,4 @@
 import logging
-import re
-from random import randint
 
 from selenium.webdriver.common.by import By
 
@@ -21,7 +19,7 @@ class PIMCreateNewEmployeeAdd(PIMBasePage):
     first_name = (By.NAME, "firstName")
     middle_name = (By.NAME, "middleName")
     last_name = (By.NAME, "lastName")
-    employee_ID = (By.ID, "employee-id")
+    employee_ID = (By.XPATH, "//label[normalize-space()='Employee Id']/following::input[contains(@class,'oxd-input')][1]")
 
     breadcrumb_last = (By.CSS_SELECTOR,".oxd-breadcrumb li:last-child")
     topbar_add_employee = (By.XPATH, "//a[contains(@class,'oxd-topbar-body-nav-tab-item') and normalize-space()='Add Employee']")
@@ -53,7 +51,6 @@ class PIMCreateNewEmployeeAdd(PIMBasePage):
 
     def open_add_employee(self):
         self.logger.info("Open Add Employee form")
-
         self.click(self.add_button)
         # Some builds require switching via the top tab after clicking Add.
         if not self.is_visible(self.first_name):
@@ -61,7 +58,12 @@ class PIMCreateNewEmployeeAdd(PIMBasePage):
         self.is_loaded(self.first_name, timeout=10)
         return self
 
-    def add_employee(self, first_name, last_name, middle_name="", employee_id =""):
+    def get_generated_employee_id(self):
+        employee_id_value = self.get_element(self.employee_ID).get_attribute("value").strip()
+        assert employee_id_value, "Employee ID was not auto-generated"
+        return employee_id_value
+
+    def add_employee(self, first_name, last_name, middle_name=""):
         self.logger.info("Add employee: first=%s, last=%s", first_name, last_name)
         self.open_add_employee()
 
@@ -74,17 +76,10 @@ class PIMCreateNewEmployeeAdd(PIMBasePage):
         self.sendkeys(self.middle_name, middle_name)
         self.sendkeys(self.last_name, last_name)
 
-        if employee_id:
-            self.validate_employee_id(employee_id)
-            employee_id_field = self.get_element(self.employee_ID)
-            employee_id_field.clear()
-            employee_id_field.send_keys(employee_id)
-        else:
-            self.logger.info("Employee ID not provided, using auto-generated value")
-
+        created_employee_id = self.get_generated_employee_id()
         self.click(self.save_button)
-        self.logger.info("Employee saved")
-        return EmployeePersonalDetailsPage(self.driver)
+        self.logger.info("Employee saved with system-generated ID : %s", created_employee_id)
+        return EmployeePersonalDetailsPage(self.driver, created_employee_id=created_employee_id)
 
 
     def submit_with_missing_name(self):
@@ -109,18 +104,6 @@ class PIMCreateNewEmployeeAdd(PIMBasePage):
         if value is None or str(value).strip() == "":
             self.logger.info("%s is required", field_name)
             raise ValueError(f"{field_name} must not be empty")
-
-    def validate_employee_id(self, employee_ID):
-        self.logger.info("validate employee ID: %s", employee_ID)
-        if not re.match(r"^\d{4}$", str(employee_ID)):
-            self.logger.info("employee_ID must be 4 digits and number only")
-            raise ValueError("Employee ID must be 4 digits and number only")
-
-    def generate_employee_id(self):
-        new_id = str(randint(1000,9999))
-        self.logger.info("Generated employee ID: %s", new_id)
-        return new_id
-
 
 
 

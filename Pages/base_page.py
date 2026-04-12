@@ -86,13 +86,13 @@ class BasePage:
 
 
     def find_all_elements(self, locator):
-        self.wait.until(EC.visibility_of_all_elements_located(locator))
+        return self.wait.until(EC.visibility_of_all_elements_located(locator))
 
     def find_all(self, locator):
-        self.wait.until(EC.presence_of_all_elements_located(locator))
+        return self.wait.until(EC.presence_of_all_elements_located(locator))
 
     def find_element(self, locator):
-        self.wait.until(EC.presence_of_element_located(locator))
+        return self.wait.until(EC.presence_of_element_located(locator))
 
     def get_element(self, dropdown_locator, timeout=15):
         wait_time = timeout if timeout is not None else self.default_timeout
