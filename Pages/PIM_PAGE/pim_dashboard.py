@@ -1,0 +1,3 @@
+class PIMDashboard:
+
+    pass

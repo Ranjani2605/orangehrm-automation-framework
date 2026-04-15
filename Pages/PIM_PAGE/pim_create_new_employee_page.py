@@ -1,5 +1,7 @@
 import logging
 
+from selenium.common import TimeoutException
+import re
 from selenium.webdriver.common.by import By
 
 
@@ -39,6 +41,9 @@ class PIMCreateNewEmployeeAdd(PIMBasePage):
     expected_tab_bar = (By.XPATH, "//a[normalize-space()='Add Employee']")
     expected_header = (By.XPATH, "//h6[normalize-space()='PIM']")
 
+
+    employee_id_error_message = (By.XPATH, "//span[normalize-space()='Employee Id already exists']")
+
     def __init__(self, driver):
         super().__init__(driver)
         self.driver = driver
@@ -60,8 +65,21 @@ class PIMCreateNewEmployeeAdd(PIMBasePage):
 
     def get_generated_employee_id(self):
         employee_id_value = self.get_element(self.employee_ID).get_attribute("value").strip()
-        assert employee_id_value, "Employee ID was not auto-generated"
+        assert employee_id_value, "Test Failed : Employee ID was not auto-generated"
+
+        try:
+            if self.is_visible(self.employee_id_error_message, timeout=3):
+                assert False, "Test Failed : Employee ID already exists"
+        except TimeoutException:
+            pass
         return employee_id_value
+
+    def employee_id_formated(self):
+        emp_id = self.get_generated_employee_id()
+        pattern = r"^\d{4}$"
+
+        assert re.match(pattern, emp_id), f"Test Failed: Employee ID formated invalid {emp_id}"
+
 
     def add_employee(self, first_name, last_name, middle_name=""):
         self.logger.info("Add employee: first=%s, last=%s", first_name, last_name)
