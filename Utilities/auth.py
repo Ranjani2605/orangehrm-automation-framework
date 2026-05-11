@@ -1,5 +1,5 @@
 from Pages.login_page import LoginPage
-from Utilities.config import config
+from Utilities.config_reader import config
 
 
 def login(driver, username=None, password=None):
