@@ -1,9 +1,7 @@
-import time
-from datetime import date, datetime, timedelta
-
-from selenium.common import TimeoutException
-from selenium.webdriver import ActionChains
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from Pages.base_page import BasePage
 
@@ -30,9 +28,11 @@ class CalendarHelper(BasePage):
         super().__init__(driver)
         self.default_timeout = default_timeout
 
-    def wait_for_element(self):
-        self.is_visible(self.calendar_widget)
-        time.sleep(0.5)
+    def wait_for_element(self, timeout=None):
+        wait_time = timeout if timeout is not None else self.default_timeout
+        return WebDriverWait(self.driver, wait_time).until(
+            EC.visibility_of_element_located(self.calendar_widget)
+        )
 
     def select_year(self, year):
         self.click(self.year_dropdown)
@@ -57,6 +57,4 @@ class CalendarHelper(BasePage):
             self.click(self.close_link)
         except Exception:
             pass
-
-        time.sleep(0.5)
-
+        self.wait_for_invisibility(self.calendar_widget)
