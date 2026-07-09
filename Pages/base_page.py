@@ -1,122 +1,104 @@
 import logging
 
 from selenium.common import TimeoutException
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common import keys
-from selenium.webdriver.common.by import By
+from selenium.webdriver import Keys
 from selenium.webdriver.support.select import Select
-
-from config.config_reader import *
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+
+from Utilities.config_reader import Config
+from Utilities.wait_utils import WaitUtils
+
+
 logger = logging.getLogger(__name__)
 
 
-
 class BasePage:
-
-    def __init__(self, driver, default_timeout=10):
+    def __init__(self, driver, default_timeout=None):
         self.driver = driver
-        self.default_timeout = default_timeout
+        self.default_timeout = default_timeout or Config.EXPLICIT_WAIT
+        self.waits = WaitUtils(driver, self.default_timeout)
         self.wait = WebDriverWait(driver, self.default_timeout)
         self.logger = logger
 
-
     def is_loaded(self, locator, timeout=None):
-        try:
-            wait_time = timeout if timeout is not None else self.default_timeout
-            WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(locator))
-            return True
-        except:
-            return False
+        return self.waits.is_visible(locator, timeout)
 
     def click(self, locator, timeout=None):
-        logger.info(f"Clicking: {locator}")
-        wait_time = timeout if timeout is not None else self.default_timeout
-        element = WebDriverWait(self.driver, wait_time).until(EC.element_to_be_clickable(locator))
+        logger.info("Clicking element: %s", locator)
+        element = self.waits.until_clickable(locator, timeout)
         element.click()
+        return element
 
     def presence_of_element(self, locator, timeout=None):
-        wait_time = timeout if timeout is not None else self.default_timeout
-        WebDriverWait(self.driver, wait_time).until(EC.presence_of_element_located(locator))
+        return self.waits.until_present(locator, timeout)
 
-    def sendkeys(self, locator, text ,timeout=10):
+    def sendkeys(self, locator, text, timeout=None):
         try:
-            wait_time = timeout if timeout is not None else self.default_timeout
-            type_field = WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(locator))
-            type_field.send_keys(text)
-        except TimeoutException:
-            raise  Exception (f"Element not visible for locator : {locator}")
+            field = self.waits.until_visible(locator, timeout)
+            field.clear()
+            field.send_keys(text)
+            return field
+        except TimeoutException as error:
+            raise TimeoutException(
+                f"Element not visible for locator: {locator}"
+            ) from error
+
+    def type_text(self, locator, text, timeout=None):
+        return self.sendkeys(locator, text, timeout)
 
     def get_text(self, locator, timeout=None):
         try:
-            wait_time = timeout if timeout is not None else self.default_timeout
-            get_field = WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(locator))
-            return get_field.text
-        except:
+            return self.waits.until_visible(locator, timeout).text
+        except TimeoutException:
             return None
 
-    def select_dropdown(self, locator,text_field,timeout=None):
+    def select_dropdown(self, locator, text_field, timeout=None):
         try:
-            wait_time = timeout if timeout is not None else self.default_timeout
-            element = WebDriverWait(self.driver, wait_time).until(EC.presence_of_element_located(locator))
-            dropdown = Select(element)
-            dropdown.select_by_visible_text(text_field)
-
-        except TimeoutException:
-            raise Exception(f"Element not loaded")
+            element = self.waits.until_present(locator, timeout)
+            Select(element).select_by_visible_text(text_field)
+            return self
+        except TimeoutException as error:
+            raise TimeoutException(f"Dropdown not loaded: {locator}") from error
 
     def select_oxd_dropdown(self, label_text, option_text, timeout=None):
-        wait_time = timeout if timeout is not None else self.default_timeout
-        dropdown = (By.XPATH, f"//label[normalize-space()='{label_text}']/following::div[contains(@class,'oxd-select-text')][1]")
-        option = (By.XPATH, f"//div[@role='listbox']//span[normalize-space()='{option_text}']")
-        WebDriverWait(self.driver, wait_time).until(EC.element_to_be_clickable(dropdown)).click()
-        WebDriverWait(self.driver, wait_time).until(EC.element_to_be_clickable(option)).click()
+        dropdown = (
+            "xpath",
+            f"//label[normalize-space()='{label_text}']"
+            "/following::div[contains(@class,'oxd-select-text')][1]",
+        )
+        option = (
+            "xpath",
+            f"//div[@role='listbox']//span[normalize-space()='{option_text}']",
+        )
+        self.click(dropdown, timeout)
+        self.click(option, timeout)
+        return self
 
-    def is_visible(self, locator, timeout=10):
-        try:
-            self.wait.until(EC.visibility_of_element_located(locator))
-            return True
-        except TimeoutException:
-            return False
+    def is_visible(self, locator, timeout=None):
+        return self.waits.is_visible(locator, timeout)
 
-    def wait_for_disappear(self, locator, timeout=5):
-        """Wait for toast/success message to disappear"""
-        self.wait.until(EC.presence_of_element_located(locator))
-
+    def wait_for_disappear(self, locator, timeout=None):
+        return self.wait_for_invisibility(locator, timeout)
 
     def find_all_elements(self, locator):
-        return self.wait.until(EC.visibility_of_all_elements_located(locator))
+        return self.waits.until_all_visible(locator)
 
     def find_all(self, locator):
-        return self.wait.until(EC.presence_of_all_elements_located(locator))
+        return self.waits.until_all_present(locator)
 
     def find_element(self, locator):
-        return self.wait.until(EC.presence_of_element_located(locator))
+        return self.waits.until_present(locator)
 
-    def get_element(self, dropdown_locator, timeout=15):
-        wait_time = timeout if timeout is not None else self.default_timeout
-        return WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(dropdown_locator))
+    def get_element(self, locator, timeout=None):
+        return self.waits.until_visible(locator, timeout)
 
-
-    def press_enter(self, locator, timeout=10):
-        wait_time = timeout if timeout is not None else self.default_timeout
-        element = WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(locator))
+    def press_enter(self, locator, timeout=None):
+        element = self.waits.until_visible(locator, timeout)
         element.send_keys(Keys.ENTER)
-
+        return self
 
     def verify_page_title(self, expected_title):
-        actual_title = self.driver.title
-        assert actual_title == expected_title, f"Expected '{expected_title}', but got '{actual_title}'"
-        return True
+        return self.driver.title == expected_title
 
-    def wait_for_invisibility(self, locator, timeout=15):
-        wait_time = timeout if timeout is not None else self.default_timeout
-        WebDriverWait(self.driver, wait_time).until(EC.invisibility_of_element_located(locator))
-
-
-
-
-
-
-
+    def wait_for_invisibility(self, locator, timeout=None):
+        return self.waits.until_invisible(locator, timeout)

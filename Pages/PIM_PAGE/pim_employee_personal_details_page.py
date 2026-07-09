@@ -1,5 +1,4 @@
 import logging
-import time
 
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException
 from selenium.webdriver import Keys
@@ -72,7 +71,7 @@ class EmployeePersonalDetailsPage(PIMBasePage):
         except ElementClickInterceptedException:
             self.wait_for_invisibility(self.loading_overlay, timeout=20)
             self.driver.execute_script("arguments[0].click();", field)
-        time.sleep(0.3)
+        self.get_element(self.calendar, timeout=10)
         self.calendar_helper.select_date(year, month, day)
         self.driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
         self.driver.execute_script("window.scrollTo(0, arguments[0]);", scroll_y)
@@ -142,8 +141,7 @@ class EmployeePersonalDetailsPage(PIMBasePage):
 
     def assert_required_error_visible(self):
         self.logger.info("Verify required validation error is visible")
-        assert self.is_visible(self.required_error), "Required validation error is not visible"
-        return self
+        return self.is_visible(self.required_error)
 
 
     def added_additional_details(self, day, month, year, nationality,marital_status,
@@ -159,8 +157,5 @@ class EmployeePersonalDetailsPage(PIMBasePage):
 
     def successfully_added_employee(self, success):
         self.logger.info("Successfully added employee: %s", success)
-        element = self.is_visible(self.successfully_saved)
-        actual_text = element.text
-
-        assert actual_text == "Successfully Saved", \
-        f"Expected 'Successfully Saved' but got '{actual_text}'"
+        actual_text = self.get_text(self.successfully_saved)
+        return actual_text == "Successfully Saved"

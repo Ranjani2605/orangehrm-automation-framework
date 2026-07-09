@@ -2,7 +2,7 @@
   "add_employee": {
     "select_role": "Admin",
     "employee_name": "manda akhil user",
-    "select_status": "Enable",
+    "select_status": "Enabled",
     "username": "Ravi@123",
     "password": "Ravi@123",
     "confirm_password": "Ravi@123"
@@ -11,7 +11,7 @@
     {
       "user_role": "ESS",
       "employee_name": "Jobin Mathew Sam",
-      "status": "Enable",
+      "status": "Enabled",
       "username": "Jobinsam@6742"
     },
     {
