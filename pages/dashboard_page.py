@@ -4,7 +4,7 @@ from selenium.common.exceptions import StaleElementReferenceException, TimeoutEx
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from Pages.base_page import BasePage
+from pages.base_page import BasePage
 from constants.constants import Constants
 from locators.dashboard_locators.dashboard_locators import (
     DashboardLocators,

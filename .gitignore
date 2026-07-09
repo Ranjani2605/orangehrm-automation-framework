@@ -9,7 +9,11 @@ __pycache__/
 venv/
 env/
 
-# Test and coverage outputs
+# Environment files
+.env
+*.env
+
+# Pytest and coverage
 .pytest_cache/
 .coverage
 .coverage.*
@@ -18,19 +22,28 @@ coverage.xml
 report.html
 reports/
 
-# Lint/type check caches
-.mypy_cache/
-.ruff_cache/
-.pytest_cache/
-
 # Allure results
 allure-results/
 allure-report/
 
-# IDEs
+# Runtime output
+logs/*.log
+screenshots/*.png
+screenshots/*.jpg
+reports/*
+!reports/.gitkeep
+!logs/.gitkeep
+!screenshots/.gitkeep
+
+# IDE/editor files
 .idea/
 .vscode/
 
 # OS files
+.DS_Store
 Thumbs.db
 Desktop.ini
+
+# Rff / mypy cache
+.ruff_cache/
+.mypy_cache/

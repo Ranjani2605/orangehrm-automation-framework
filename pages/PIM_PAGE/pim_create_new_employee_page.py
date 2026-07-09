@@ -6,9 +6,9 @@ from selenium.webdriver.common.by import By
 
 
 
-from Pages.PIM_PAGE.pim_employee_personal_details_page import EmployeePersonalDetailsPage
+from pages.PIM_PAGE.pim_employee_personal_details_page import EmployeePersonalDetailsPage
 
-from Pages.components.breadcrumb_helper import *
+from pages.components.breadcrumb_helper import *
 class PIMCreateNewEmployeeAdd(PIMBasePage):
 
     logger = logging.getLogger(__name__)

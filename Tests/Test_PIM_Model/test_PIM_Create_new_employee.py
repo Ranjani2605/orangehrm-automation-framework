@@ -1,8 +1,8 @@
 import allure
 
-from Pages.PIM_PAGE.pim_create_new_employee_page import PIMCreateNewEmployeeAdd
-from Pages.PIM_PAGE.pim_employee_list import PIMEmployeeList
-from Pages.left_sidebar_page import LeftSidebarPage
+from pages.PIM_PAGE.pim_create_new_employee_page import PIMCreateNewEmployeeAdd
+from pages.PIM_PAGE.pim_employee_list import PIMEmployeeList
+from pages.left_sidebar_page import LeftSidebarPage
 
 
 @allure.title("Add employee")

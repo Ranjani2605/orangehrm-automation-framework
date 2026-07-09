@@ -1,6 +1,6 @@
 import os
 
-from Pages.login_page.login_page import LoginPage
+from pages.login_page.login_page import LoginPage
 from Utilities.config_reader import Config
 
 

@@ -3,8 +3,8 @@ import logging
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-from Pages.PIM_PAGE.PIM_BASE_PAGE import PIMBasePage
-from Pages.base_page import BasePage
+from pages.PIM_PAGE.PIM_BASE_PAGE import PIMBasePage
+from pages.base_page import BasePage
 
 
 class BreadcrumbHelper(BasePage):

@@ -4,10 +4,10 @@ from selenium.common.exceptions import ElementClickInterceptedException, Timeout
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 
-from Pages.PIM_PAGE.PIM_BASE_PAGE import PIMBasePage
-from Pages.PIM_PAGE.pim_employee_list import PIMEmployeeList
-from Pages.base_page import BasePage
-from Pages.components.calendar_helper import CalendarHelper
+from pages.PIM_PAGE.PIM_BASE_PAGE import PIMBasePage
+from pages.PIM_PAGE.pim_employee_list import PIMEmployeeList
+from pages.base_page import BasePage
+from pages.components.calendar_helper import CalendarHelper
 
 
 class EmployeePersonalDetailsPage(PIMBasePage):

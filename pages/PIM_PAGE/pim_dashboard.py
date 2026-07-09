@@ -1,6 +1,6 @@
 from selenium.webdriver.common.by import By
 
-from Pages.components.table_helper import TableHelper
+from pages.components.table_helper import TableHelper
 
 
 class PIMDashboard(TableHelper):
