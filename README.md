@@ -1,115 +1,110 @@
-# POM Framework
-
-Selenium, Pytest, Page Object Model, Allure, and CI examples for OrangeHRM UI automation.
-
-The framework is intentionally simple: page objects contain locators/actions/queries, tests contain assertions, and shared concerns live in fixtures or small utilities.
-
-## Setup
-
-```bash
+File type: markdown
+# OrangeHRM Selenium Python Pytest Automation Framework
+## Project Overview
+This is a UI automation framework built for the OrangeHRM demo application using Python, Selenium 
+WebDriver, Pytest, Page Object Model, JSON test data, Allure reporting, GitHub Actions and Jenkins.
+The goal of this project is to demonstrate practical QA automation skills for QA Automation Engineer / 
+Automation Test Engineer roles in the UK.
+## Tech Stack- Python- Selenium WebDriver- Pytest- Page Object Model- JSON test data- Explicit waits- Allure reporting- Logging- Screenshot capture on failure- GitHub Actions- Jenkins
+## Framework Features- Clean Page Object Model design- Reusable Selenium actions in BasePage- Test data separated into JSON files- Pytest fixtures for browser setup and login- CLI options for browser and headless mode- Explicit waits instead of time.sleep- Screenshot capture on test failure- Allure result generation- GitHub Actions pipeline- Jenkins pipeline- Smoke, regression, validation and module-level Pytest markers
+## Test Scenarios Covered
+1. Valid login
+2. Invalid login
+3. Login with blank username
+4. Login with blank password
+5. Dashboard page validation
+6. Navigate to PIM module
+7. Add employee with mandatory fields
+8. Add employee with first, middle and last name
+9. Validate employee ID is auto-generated / not empty
+10. Search employee by employee ID
+11. Search employee by employee name
+12. Verify employee details in employee table
+13. Edit employee personal details
+14. Validate required field error messages
+15. Logout successfully
+## Folder Structure
+orangehrm-selenium-python-pytest-framework/
+|-- config/
+|   `-- config.py
+|-- pages/
+|   |-- base_page.py
+|   |-- login_page.py
+|   |-- dashboard_page.py
+|   |-- pim_page.py
+|   |-- add_employee_page.py
+|   |-- employee_list_page.py
+|   `-- personal_details_page.py
+|-- tests/
+|   |-- test_login.py
+|   |-- test_dashboard.py
+|   |-- test_pim_employee.py
+|   `-- test_logout.py
+|-- test_data/
+|   |-- login_data.json
+|   `-- employee_data.json
+|-- utilities/
+|   |-- data_reader.py
+|   |-- logger.py
+|   `-- screenshot.py
+|-- reports/
+|-- screenshots/
+|-- logs/
+|-- .github/
+|   `-- workflows/
+|       `-- tests.yml
+|-- conftest.py
+|-- pytest.ini
+|-- requirements.txt
+|-- Jenkinsfile
+|-- README.md
+`-- .gitignore
+## Setup Instructions
+### Clone the repository
+git clone https://github.com/YOUR_USERNAME/orangehrm-selenium-python-pytest-framework.git
+cd orangehrm-selenium-python-pytest-framework
+### Create virtual environment
 python -m venv .venv
+### Activate virtual environment on Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+### Install dependencies
 pip install -r requirements.txt
-```
-
-## Configuration
-
-Runtime values can be supplied through environment variables, `Utilities/.env`, root `.env`, or `config/<env>.env`.
-
-Supported values:
-
-```text
-ENV=qa
-BASE_URL=https://opensource-demo.orangehrmlive.com
-APP_PATH=/web/index.php/auth/login
-ORANGEHRM_USERNAME=Admin
-ORANGEHRM_PASSWORD=admin123
-BROWSER=chrome
-HEADLESS=false
-EXPLICIT_WAIT=20
-PAGE_LOAD_TIMEOUT=30
-```
-
-## Running Tests
-
-```bash
+## Test Execution Commands
+Run all tests:
 pytest
+Run tests in headed Chrome:
 pytest --browser chrome
-pytest --browser edge
-pytest --browser firefox
-pytest --browser chrome --env qa --headless
-pytest Tests/test_login.py
-```
-
-Allure results are written to `allure-results` by default.
-
-```bash
+Run tests in headless Chrome:
+pytest --browser chrome --headless
+Run smoke tests:
+pytest -m smoke
+Run regression tests:
+pytest -m regression
+Run login tests:
+pytest -m login
+Run PIM tests:
+pytest -m pim
+## Allure Report
+Run tests with Allure results:
+pytest --alluredir=allure-results
+Open Allure report:
 allure serve allure-results
-```
-
-## Fixture Strategy
-
-Session scope:
-
-- `environment_config`: environment and URL values
-- `browser_config`: browser and headless mode
-- `test_data`: shared JSON test data
-- `allure_environment`: Allure environment details
-
-Module scope:
-
-- `driver`: creates one browser per module
-- `authenticated_driver`: login once before module tests and logout after module tests
-
-Function scope:
-
-- `test_logging`: logs test start/completion
-- `pytest_runtest_makereport`: screenshots, browser logs, and current URL on failure
-
-Preferred flow:
-
-```text
-Login
-├── Test Case 1
-├── Test Case 2
-├── Test Case 3
-└── Logout
-```
-
-Use raw `driver` only for tests that need to validate login or unauthenticated behaviour.
-
-## Improvements Made
-
-| Current issue | Risk / impact | Improved implementation | Reasoning |
-| --- | --- | --- | --- |
-| Chrome was created directly inside fixtures/tests. | Cross-browser runs and CI setup were inconsistent. | `Utilities/browser_factory.py` centralises Chrome, Edge, and Firefox creation using WebDriverManager. | One place controls browser options, page load timeout, and headless mode. |
-| Feature tests logged in before every test. | Slow execution and more flaky failures around authentication. | `authenticated_driver` logs in once per module and logs out during module teardown. | Matches enterprise regression execution where setup cost is shared safely within a module. |
-| Test data was loaded repeatedly with hard-coded paths. | Duplicate code and broken paths in nested test folders. | `test_data` session fixture loads `Utilities/data.json` once. | Easier onboarding and fewer path mistakes. |
-| Wait logic was duplicated and some methods used broad exceptions. | Timeouts were hidden or inconsistent. | `Utilities/wait_utils.py` and `BasePage` provide reusable explicit wait wrappers. | Stable waits make failures clearer and reduce flaky timing issues. |
-| `time.sleep()` was used in PIM date handling. | Fixed waits slow tests and still fail on slow pages. | Replaced sleep with a wait for the calendar widget. | Waits follow application state instead of elapsed time. |
-| Assertions existed in some page objects. | Page methods mixed actions and test decisions. | Page validation helpers now return booleans where changed. | Tests own assertions; page objects remain reusable. |
-| Logging created timestamped files with a bad date format and duplicate handlers. | Hard to find the active run log; repeated handlers duplicate log lines. | `logs/automation.log` is configured once. | Predictable log location for CI artifacts and local debugging. |
-| Failure evidence was manual. | Failed CI runs lacked useful diagnostics. | Pytest hook attaches screenshots, browser logs, and current URL to Allure. | Faster triage without rerunning locally. |
-| Route constants ignored configured environments. | Dev/qa/staging/prod support was partial. | Constants derive URLs from `BASE_URL`. | Same tests can target different environments. |
-| CI examples were missing. | Teams had to invent pipeline steps. | Added GitHub Actions, Azure DevOps, and Jenkins examples. | Gives a practical baseline for enterprise CI/CD. |
-
-## Project Structure
-
-```text
-Pages/                  Page objects and reusable page components
-Tests/                  Pytest suites and shared conftest fixtures
-Utilities/              Browser factory, waits, config, logging, screenshots
-constants/              Environment-aware application route constants
-locators/               Page locator modules
-allure-results/         Runtime Allure results
-logs/automation.log     Runtime framework log
-```
-
+Note: Allure command-line tool and Java must be installed separately to open the HTML report.
 ## CI/CD
-
-Examples are included:
-
-- `.github/workflows/ui-tests.yml`
-- `azure-pipelines.yml`
-- `Jenkinsfile`
-
-Pipelines install Python dependencies, run headless tests, generate Allure results, and archive logs/reports.
+GitHub Actions workflow file:
+.github/workflows/tests.yml
+Jenkins pipeline file:
+Jenkinsfile
+## Screenshots
+Failure screenshots are saved under:
+screenshots/
+Screenshots are also attached to Allure reports when tests fail.
+## What This Project Demonstrates- Python Selenium automation- Page Object Model design- Pytest fixtures and markers
+- UI test automation for HR workflows
+-  Positive and negative test scenarios
+-  Form validation testing
+-  Dynamic employee test data
+-  Search and table validation
+-  Screenshot capture on failure
+- Allure reporting
+- GitHub Actions and Jenkins CI/CD exposure

@@ -11,94 +11,103 @@ from Utilities.wait_utils import WaitUtils
 
 logger = logging.getLogger(__name__)
 
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from config.config import Config
+from Utilities.logger import get_logger
+
 
 class BasePage:
-    def __init__(self, driver, default_timeout=None):
+    """
+    Common Selenium actions used by all page classes.
+    Tests should call page methods, not raw Selenium directly.
+    """
+    def __init__(self, driver):
         self.driver = driver
-        self.default_timeout = default_timeout or Config.EXPLICIT_WAIT
-        self.waits = WaitUtils(driver, self.default_timeout)
-        self.wait = WebDriverWait(driver, self.default_timeout)
-        self.logger = logger
+        self.wait = WebDriverWait(driver, Config.DEFAULT_TIMEOUT)
+        self.logger = get_logger(self.__class__.__name__)
 
-    def is_loaded(self, locator, timeout=None):
-        return self.waits.is_visible(locator, timeout)
+    def open_url(self, url):
+        self.logger.info(f"Opening URL: {url}")
+        self.driver.get(url)
 
-    def click(self, locator, timeout=None):
-        logger.info("Clicking element: %s", locator)
-        element = self.waits.until_clickable(locator, timeout)
-        element.click()
-        return element
+    def wait_for_visible(self, locator):
+        return self.wait.until(EC.visibility_of_element_located(locator))
 
-    def presence_of_element(self, locator, timeout=None):
-        return self.waits.until_present(locator, timeout)
+    def wait_for_clickable(self, locator):
+        return self.wait.until(EC.element_to_be_clickable(locator))
 
-    def sendkeys(self, locator, text, timeout=None):
+    def wait_for_presence(self, locator):
+        return self.wait.until(EC.presence_of_element_located(locator))
+
+    def wait_for_all_visible(self, locator):
+        return self.wait.until(EC.visibility_of_all_elements_located(locator))
+
+    def click(self, locator):
+        self.logger.info(f"Clicking element: {locator}")
+        self.wait_for_clickable(locator).click()
+
+    def enter_text(self, locator, text, clear_first=True):
+        self.logger.info(f"Entering text into element: {locator}")
+        element = self.wait_for_visible(locator)
+
+        if clear_first:
+            element.clear()
+        element.send_keys(text)
+
+    def get_text(self, locator):
+        text = self.wait_for_visible(locator).text
+        self.logger.info(f"Text from {locator}: {text}")
+        return text
+
+    def get_attribute(self, locator, attribute_name):
+        value = self.wait_for_visible(locator).get_attribute(attribute_name)
+        self.logger.info(f"Attribute {attribute_name} from {locator}: {value}")
+        return value
+
+    def is_visible(self, locator):
         try:
-            field = self.waits.until_visible(locator, timeout)
-            field.clear()
-            field.send_keys(text)
-            return field
-        except TimeoutException as error:
-            raise TimeoutException(
-                f"Element not visible for locator: {locator}"
-            ) from error
-
-    def type_text(self, locator, text, timeout=None):
-        return self.sendkeys(locator, text, timeout)
-
-    def get_text(self, locator, timeout=None):
-        try:
-            return self.waits.until_visible(locator, timeout).text
+            self.wait_for_visible(locator)
+            return True
         except TimeoutException:
-            return None
+            return False
 
-    def select_dropdown(self, locator, text_field, timeout=None):
-        try:
-            element = self.waits.until_present(locator, timeout)
-            Select(element).select_by_visible_text(text_field)
-            return self
-        except TimeoutException as error:
-            raise TimeoutException(f"Dropdown not loaded: {locator}") from error
+    def get_elements(self, locator):
+        return self.driver.find_elements(*locator)
 
-    def select_oxd_dropdown(self, label_text, option_text, timeout=None):
-        dropdown = (
-            "xpath",
-            f"//label[normalize-space()='{label_text}']"
-            "/following::div[contains(@class,'oxd-select-text')][1]",
-        )
-        option = (
-            "xpath",
-            f"//div[@role='listbox']//span[normalize-space()='{option_text}']",
-        )
-        self.click(dropdown, timeout)
-        self.click(option, timeout)
-        return self
+    def wait_for_url_contains(self, partial_url):
+        self.logger.info(f"Waiting for URL to contain: {partial_url}")
+        return self.wait.until(EC.url_contains(partial_url))
 
-    def is_visible(self, locator, timeout=None):
-        return self.waits.is_visible(locator, timeout)
+    def scroll_to_element(self, locator):
+        element = self.wait_for_visible(locator)
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
 
-    def wait_for_disappear(self, locator, timeout=None):
-        return self.wait_for_invisibility(locator, timeout)
+    def press_enter(self, locator):
+        self.wait_for_visible(locator).send_keys(Keys.ENTER)
 
-    def find_all_elements(self, locator):
-        return self.waits.until_all_visible(locator)
+    def move_to_element(self, locator):
+        element = self.wait_for_visible(locator)
+        ActionChains(self.driver).move_to_element(element).perform()
 
-    def find_all(self, locator):
-        return self.waits.until_all_present(locator)
+    def get_current_url(self):
+        return self.driver.current_url
 
-    def find_element(self, locator):
-        return self.waits.until_present(locator)
 
-    def get_element(self, locator, timeout=None):
-        return self.waits.until_visible(locator, timeout)
 
-    def press_enter(self, locator, timeout=None):
-        element = self.waits.until_visible(locator, timeout)
-        element.send_keys(Keys.ENTER)
-        return self
 
-    def verify_page_title(self, expected_title):
-        return self.driver.title == expected_title
 
-    def wait_for_invisibility(self, locator, timeout=None):
-        return self.waits.until_invisible(locator, timeout)
+
+
+
+
+
+
+
+
+
+
+
